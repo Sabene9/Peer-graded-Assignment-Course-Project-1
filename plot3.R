@@ -2,34 +2,43 @@ Electric_power_consumption <-
   read.csv("household_power_consumption.txt", 
            header = TRUE, sep = ";", dec = ".", na.strings = "?")
 
-Electric_power_consumption$DateTime <- strptime(
-  paste(Electric_power_consumption$Date, Electric_power_consumption$Time),
-  format = "%d/%m/%Y %H:%M:%S"
-)
+Electric_power_consumption$Date <- as.Date(Electric_power_consumption$Date, "%d/%m/%Y")
+
+subset <- Electric_power_consumption[Electric_power_consumption$Date == "2007-02-01" |
+                                       Electric_power_consumption$Date == "2007-02-02", ]
+
+subset$Datetime <- strptime(paste(subset$Date, subset$Time),
+                            "%Y-%m-%d %H:%M:%S")
 
 
 png("plot3.png", width = 480, height = 480)
 
 # filtrage
-data_subset <- subset(Electric_power_consumption, 
-                      Date %in% c("1/2/2007", "2/2/2007"))
-plot(data_subset$DateTime,
-     data_subset$Sub_metering_1,
+
+plot(subset$Datetime,
+     subset$Sub_metering_1,
      type = "l",
      xlab = "",
-     ylab = "Energy sub metering")
+     ylab = "Energy sub metering",
+     xaxt = "n")
 
-lines(data_subset$DateTime,
-      data_subset$Sub_metering_2,
+lines(subset$Datetime,
+      subset$Sub_metering_2,
       col = "red")
 
-lines(data_subset$DateTime,
-      data_subset$Sub_metering_3,
+lines(subset$Datetime,
+      subset$Sub_metering_3,
       col = "blue")
 
 legend("topright",
        lty = 1,
        col = c("black", "red", "blue"),
        legend = c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
+
+axis(1,
+     at = as.POSIXct(c("2007-02-01 00:00:00",
+                       "2007-02-02 00:00:00",
+                       "2007-02-03 00:00:00")),
+     labels = c("Thu", "Fri", "Sat"))
 
 dev.off()
